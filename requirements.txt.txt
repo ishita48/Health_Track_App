@@ -1,0 +1,5 @@
+firebase-admin
+streamlit
+requests
+pandas
+numpy
