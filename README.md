@@ -23,7 +23,14 @@ The Health Tracker App boasts a robust technological infrastructure designed to 
 - **Nutritionix API: Unraveling Nutritional Insights**
   - Leveraging the Nutritionix API, our app delivers accurate and comprehensive nutritional information to users, empowering them to make informed decisions about their dietary habits. With access to a vast database of nutritional data, users can effortlessly track their food intake, monitor calorie consumption, and optimize their nutrition for optimal health and wellness.
 
-**Charting Your Wellness Odyssey**
+- **Pandas: Powering Data Analysis**
+  - Pandas, a versatile Python library, plays a crucial role in our app's data analysis pipeline. With its powerful data structures and easy-to-use functions, Pandas enables us to manipulate, analyze, and visualize data with unparalleled efficiency. From summarizing daily calorie intake to identifying trends in exercise routines, Pandas empowers us to extract valuable insights from user-generated data and deliver personalized recommendations for improved health and wellness.
+
+- **Requests: Seamless API Integration**
+  - The Requests library serves as the bridge between our app and external APIs, facilitating seamless integration with services such as the Nutritionix API. With its simple and intuitive interface, Requests allows us to make HTTP requests and retrieve data from external sources effortlessly. Whether it's fetching nutritional information for a food item or synchronizing user data with Firebase, Requests streamlines the process of accessing external resources and enriching the user experience with real-time data updates.
+
+- **Datetime: Precision Timing**
+  - Datetime, a fundamental Python module for working with dates and times, plays a crucial role in our app's logging and tracking functionalities. By accurately timestamping user activities such as food intake, exercise sessions, and sleep patterns, Datetime enables us to provide users with comprehensive insights into their daily routines and monitor progress over time. Its precise timing capabilities ensure that every interaction with the app is recorded with accuracy, allowing users to make informed decisions and track their health journey with confidence.
 
 ## 📊 **Key Features:**
 
