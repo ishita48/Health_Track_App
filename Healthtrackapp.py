@@ -7,7 +7,7 @@ from datetime import datetime
 
 # Initialize Firebase app
 if not firebase_admin._apps:
-    cred = credentials.Certificate("C:/Users/nisha/OneDrive/Health_App/healthtrackapp-d4fd4-firebase-adminsdk-98hh7-fa007df972.json")
+    cred = credentials.Certificate("healthtrackapp-d4fd4-firebase-adminsdk-98hh7-fa007df972.json")
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
