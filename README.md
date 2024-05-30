@@ -6,9 +6,9 @@
 
 Embark on a transformative journey towards holistic well-being with the Health Tracker App. More than just a fitness companion, our app is a revolutionary platform that combines state-of-the-art technology with personalized insights to empower individuals to take control of their health and wellness. Whether you're striving for fitness milestones, managing chronic conditions, or seeking balance in your daily life, the Health Tracker App is your ultimate ally in achieving vitality and longevity.
 
--> **Experience the Health Tracker App**: [Click here](#) to dive into a world of wellness.
+-> **Experience the Health Tracker App**: [Click here](https://healthtrackapp.streamlit.app/?embed_options=dark_theme) to dive into a world of wellness.
 
--> **Watch the Demo**: Explore a quick demo of the app [here](https://healthtrackapp.streamlit.app/?embed_options=dark_theme) to witness its power in action.
+-> **Watch the Demo**: Explore a quick demo of the app [here](#) to witness its power in action.
 
 **Technological Marvels**
 
