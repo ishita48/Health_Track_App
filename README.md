@@ -6,10 +6,12 @@
 
 Embark on a transformative journey towards holistic well-being with the Health Tracker App. More than just a fitness companion, our app is a revolutionary platform that combines state-of-the-art technology with personalized insights to empower individuals to take control of their health and wellness. Whether you're striving for fitness milestones, managing chronic conditions, or seeking balance in your daily life, the Health Tracker App is your ultimate ally in achieving vitality and longevity.
 
-**Experience the Health Tracker App**: [Click here](https://focusflow-pomodoro-app.netlify.app/) to dive into a world of productivity.
+**Experience the Health Tracker App**: [Click here](https://healthtrackapp.streamlit.app/?embed_options=dark_theme) to dive into a world of wellness.
                                                                                <br>OR
 </br>
-**Watch the Demo**: link will be here soon
+**Watch the Demo**: Explore a quick demo of the app <a href="https://www.youtube.com/watch?v=gFnAjGA1fwg" target="_blank">
+    <img src="https://img.youtube.com/vi/gFnAjGA1fwg/0.jpg" alt="Watch the demo" width="200">
+</a>
 
 ## 🛠️ **Technological Marvels**
 
