@@ -1,3 +1,4 @@
+import os
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
 import streamlit as st
@@ -16,8 +17,8 @@ db = firestore.client()
 
 # Nutritionix API credentials
 API_URL = "https://trackapi.nutritionix.com/v2/natural/nutrients"
-API_KEY = "01cdcf515d8e7813ca086b9a1c673891"
-APP_ID = "5ed53420"
+API_KEY = os.environ["NUTRITIONIX_API_KEY"]
+APP_ID = os.environ["NUTRITIONIX_APP_ID"]
 
 # Firebase Web API Key for client-side authentication
 FIREBASE_WEB_API_KEY = os.environ["FIREBASE_WEB_API_KEY"]
