@@ -2,6 +2,8 @@ import firebase_admin
 from firebase_admin import credentials, firestore, auth
 import streamlit as st
 import requests
+import requests as _requests
+import os
 import pandas as pd
 from datetime import datetime
 
@@ -16,6 +18,9 @@ db = firestore.client()
 API_URL = "https://trackapi.nutritionix.com/v2/natural/nutrients"
 API_KEY = "01cdcf515d8e7813ca086b9a1c673891"
 APP_ID = "5ed53420"
+
+# Firebase Web API Key for client-side authentication
+FIREBASE_WEB_API_KEY = os.environ["FIREBASE_WEB_API_KEY"]
 
 # Function to fetch calories from Nutritionix API
 def fetch_calories_from_nutritionix(food_item):
@@ -72,13 +77,19 @@ def user_authentication():
         password = st.text_input("Password", type="password")
         if st.button("Sign In"):
             try:
-                user = auth.get_user_by_email(email)
-                st.success(f"Welcome back, {user.email}!")
-                user_id = user.uid
+                resp = _requests.post(
+                    f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_WEB_API_KEY}",
+                    json={"email": email, "password": password, "returnSecureToken": True},
+                    timeout=10
+                )
+                resp.raise_for_status()
+                payload = resp.json()
+                user_id = payload["localId"]
                 st.session_state.user_id = user_id
+                st.success(f"Welcome back, {email}!")
                 st.experimental_rerun()
-            except auth.UserNotFoundError:
-                st.error("User not found. Please check your credentials or sign up.")
+            except _requests.HTTPError:
+                st.error("Invalid email or password.")
             except Exception as e:
                 st.error(f"Error during sign-in: {e}")
     else:
