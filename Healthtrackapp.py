@@ -1,4 +1,5 @@
 import os
+import functools
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
 import streamlit as st
@@ -33,7 +34,10 @@ def get_verified_user_id():
     return decoded["uid"]
 
 # Function to fetch calories from Nutritionix API
-def fetch_calories_from_nutritionix(food_item):
+# lru_cache deduplicates repeated calls for the same food string within the
+# lifetime of the process, preventing redundant paid API requests.
+@functools.lru_cache(maxsize=256)
+def fetch_calories_from_nutritionix(food_item: str):
     headers = {
         "x-app-id": APP_ID,
         "x-app-key": API_KEY,
@@ -41,13 +45,40 @@ def fetch_calories_from_nutritionix(food_item):
     data = {
         "query": food_item
     }
-    response = requests.post(API_URL, headers=headers, json=data)
+    response = requests.post(API_URL, headers=headers, json=data, timeout=10)
     if response.status_code == 200:
         nutrients = response.json()["foods"][0]
         return nutrients["nf_calories"]
     else:
         st.error("Failed to fetch data from Nutritionix API")
         return None
+
+# Per-user rate limiting: maximum API calls allowed within the rolling window
+_RATE_LIMIT_MAX_CALLS = 10
+_RATE_LIMIT_WINDOW_SECONDS = 60
+
+def _is_rate_limited(user_id: str) -> bool:
+    """
+    Return True if the given user has exceeded the allowed number of
+    Nutritionix API calls within the rolling time window.
+    Tracking state is stored in st.session_state so it is per-session.
+    """
+    now = datetime.utcnow().timestamp()
+    key = f"_nutritionix_call_times_{user_id}"
+    if key not in st.session_state:
+        st.session_state[key] = []
+
+    # Keep only timestamps that fall inside the current window
+    st.session_state[key] = [
+        t for t in st.session_state[key]
+        if now - t < _RATE_LIMIT_WINDOW_SECONDS
+    ]
+
+    if len(st.session_state[key]) >= _RATE_LIMIT_MAX_CALLS:
+        return True
+
+    st.session_state[key].append(now)
+    return False
 
 # Function to save data to Firebase
 def save_log_to_firebase(log, user_id):
@@ -493,11 +524,20 @@ def main():
         food = st.text_input("Food")
         if st.button("Add Log"):
             if food:
-                calories = fetch_calories_from_nutritionix(food)
-                if calories is not None:
-                    new_log = {"Date": datetime.today().strftime('%Y-%m-%d %H:%M:%S'), "Food": food, "Calories": calories}
-                    save_log_to_firebase(new_log, user_id)
-                    st.success(f"Log added: {food} - {calories} calories")
+                # Enforce per-user rate limit before calling the external API
+                if _is_rate_limited(user_id):
+                    st.error(
+                        f"You have made too many API requests. "
+                        f"Please wait before looking up another food item "
+                        f"(limit: {_RATE_LIMIT_MAX_CALLS} requests per "
+                        f"{_RATE_LIMIT_WINDOW_SECONDS} seconds)."
+                    )
+                else:
+                    calories = fetch_calories_from_nutritionix(food)
+                    if calories is not None:
+                        new_log = {"Date": datetime.today().strftime('%Y-%m-%d %H:%M:%S'), "Food": food, "Calories": calories}
+                        save_log_to_firebase(new_log, user_id)
+                        st.success(f"Log added: {food} - {calories} calories")
             else:
                 st.error("Please enter a food item")
 
