@@ -1,7 +1,10 @@
+import os
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
 import streamlit as st
 import requests
+import requests as _requests
+import os
 import pandas as pd
 from datetime import datetime
 
@@ -14,8 +17,11 @@ db = firestore.client()
 
 # Nutritionix API credentials
 API_URL = "https://trackapi.nutritionix.com/v2/natural/nutrients"
-API_KEY = "01cdcf515d8e7813ca086b9a1c673891"
-APP_ID = "5ed53420"
+API_KEY = os.environ["NUTRITIONIX_API_KEY"]
+APP_ID = os.environ["NUTRITIONIX_APP_ID"]
+
+# Firebase Web API Key for client-side authentication
+FIREBASE_WEB_API_KEY = os.environ["FIREBASE_WEB_API_KEY"]
 
 # Function to verify the stored ID token and return the authenticated user_id.
 # Raises an exception if the token is missing, invalid, or expired.
@@ -97,8 +103,8 @@ def user_authentication():
                 st.success(f"Welcome back, {email}!")
                 st.session_state.id_token = id_token
                 st.experimental_rerun()
-            except auth.UserNotFoundError:
-                st.error("User not found. Please check your credentials or sign up.")
+            except _requests.HTTPError:
+                st.error("Invalid email or password.")
             except Exception as e:
                 st.error(f"Error during sign-in: {e}")
     else:
