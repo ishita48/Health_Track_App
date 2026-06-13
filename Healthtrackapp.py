@@ -17,6 +17,15 @@ API_URL = "https://trackapi.nutritionix.com/v2/natural/nutrients"
 API_KEY = "01cdcf515d8e7813ca086b9a1c673891"
 APP_ID = "5ed53420"
 
+# Function to verify the stored ID token and return the authenticated user_id.
+# Raises an exception if the token is missing, invalid, or expired.
+def get_verified_user_id():
+    id_token = st.session_state.get("id_token")
+    if not id_token:
+        raise ValueError("No ID token found in session.")
+    decoded = auth.verify_id_token(id_token)
+    return decoded["uid"]
+
 # Function to fetch calories from Nutritionix API
 def fetch_calories_from_nutritionix(food_item):
     headers = {
@@ -72,10 +81,21 @@ def user_authentication():
         password = st.text_input("Password", type="password")
         if st.button("Sign In"):
             try:
-                user = auth.get_user_by_email(email)
-                st.success(f"Welcome back, {user.email}!")
-                user_id = user.uid
-                st.session_state.user_id = user_id
+                # Sign in via Firebase REST API to obtain a verifiable ID token
+                rest_url = (
+                    "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
+                    "?key=AIzaSyD_placeholder_replace_with_real_web_api_key"
+                )
+                payload = {"email": email, "password": password, "returnSecureToken": True}
+                resp = requests.post(rest_url, json=payload)
+                if resp.status_code != 200:
+                    st.error("Invalid email or password.")
+                    return
+                id_token = resp.json()["idToken"]
+                # Verify the token server-side immediately to confirm authenticity
+                decoded = auth.verify_id_token(id_token)
+                st.success(f"Welcome back, {email}!")
+                st.session_state.id_token = id_token
                 st.experimental_rerun()
             except auth.UserNotFoundError:
                 st.error("User not found. Please check your credentials or sign up.")
@@ -98,8 +118,20 @@ def user_authentication():
                 try:
                     user = auth.create_user(email=email, password=password)
                     st.success(f"User created: {user.email}")
-                    user_id = user.uid
-                    st.session_state.user_id = user_id
+                    # Sign in immediately after creation to obtain a verifiable ID token
+                    rest_url = (
+                        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
+                        "?key=AIzaSyD_placeholder_replace_with_real_web_api_key"
+                    )
+                    payload = {"email": email, "password": password, "returnSecureToken": True}
+                    resp = requests.post(rest_url, json=payload)
+                    if resp.status_code != 200:
+                        st.error("Account created but automatic sign-in failed. Please sign in manually.")
+                        return
+                    id_token = resp.json()["idToken"]
+                    decoded = auth.verify_id_token(id_token)
+                    user_id = decoded["uid"]
+                    st.session_state.id_token = id_token
                     save_user_profile_to_firebase(user_id, name, age, weight, daily_calorie_goal)
                     st.experimental_rerun()
                 except Exception as e:
@@ -326,14 +358,22 @@ def fetch_monthly_summary(user_id):
 
 # Main Streamlit app
 def main():
-    if "user_id" not in st.session_state:
+    if "id_token" not in st.session_state:
         user_authentication()
+        return
+
+    # Verify the stored ID token on every page load; derive user_id from the
+    # server-side verified token rather than trusting any client-supplied value.
+    try:
+        user_id = get_verified_user_id()
+    except Exception:
+        st.session_state.pop("id_token", None)
+        st.error("Session expired or invalid. Please log in again.")
+        st.stop()
         return
 
     st.set_page_config(page_title="Health Tracker", layout="wide")
     st.title("Health Tracker")
-
-    user_id = st.session_state.user_id
 
     user_profile = fetch_user_profile_from_firebase(user_id)
     if user_profile:
@@ -507,7 +547,7 @@ def main():
         st.line_chart(monthly_summary_df.set_index("Month")["Calories"])
 
     if st.button("Logout", key="logout_button"):
-        del st.session_state["user_id"]
+        st.session_state.pop("id_token", None)
         st.experimental_rerun()
 
 if __name__ == "__main__":
