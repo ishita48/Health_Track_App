@@ -1,17 +1,18 @@
 import os
+import json
 import functools
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
 import streamlit as st
 import requests
 import requests as _requests
-import os
 import pandas as pd
 from datetime import datetime
 
 # Initialize Firebase app
 if not firebase_admin._apps:
-    cred = credentials.Certificate("healthtrackapp-d4fd4-firebase-adminsdk-98hh7-fa007df972.json")
+    service_account_info = json.loads(os.environ["FIREBASE_SERVICE_ACCOUNT_JSON"])
+    cred = credentials.Certificate(service_account_info)
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
