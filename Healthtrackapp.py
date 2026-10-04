@@ -121,7 +121,7 @@ def user_authentication():
                 # Sign in via Firebase REST API to obtain a verifiable ID token
                 rest_url = (
                     "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
-                    "?key=AIzaSyD_placeholder_replace_with_real_web_api_key"
+                    f"?key={FIREBASE_WEB_API_KEY}"
                 )
                 payload = {"email": email, "password": password, "returnSecureToken": True}
                 resp = requests.post(rest_url, json=payload)
@@ -158,7 +158,7 @@ def user_authentication():
                     # Sign in immediately after creation to obtain a verifiable ID token
                     rest_url = (
                         "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
-                        "?key=AIzaSyD_placeholder_replace_with_real_web_api_key"
+                        f"?key={FIREBASE_WEB_API_KEY}"
                     )
                     payload = {"email": email, "password": password, "returnSecureToken": True}
                     resp = requests.post(rest_url, json=payload)
